@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <!-- PWA: manifest и цвет темы -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4a90e2">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Study App</title>
@@ -1542,5 +1545,59 @@
         // Инициализация приложения после загрузки DOM
         document.addEventListener('DOMContentLoaded', initApp);
     </script>
+    <!-- Кнопка установки приложения (будет видна только если можно установить) -->
+<button id="installBtn"
+        style="display:none;
+               position: fixed;
+               bottom: 20px;
+               right: 20px;
+               padding: 10px 20px;
+               background-color: #4a90e2;
+               color: white;
+               border: none;
+               border-radius: 5px;
+               z-index: 1000;
+               cursor: pointer;">
+  📲 Установить приложение
+    <script>
+  // Регистрация service worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('sw.js')
+        .then(function(reg) {
+          console.log('Service Worker зарегистрирован:', reg);
+        }).catch(function(err) {
+          console.log('Ошибка регистрации Service Worker:', err);
+        });
+    });
+  }
+
+  let deferredPrompt;
+  const installBtn = document.getElementById('installBtn');
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    // Отключаем автоматический показ
+    e.preventDefault();
+    deferredPrompt = e;
+
+    // Показываем кнопку
+    installBtn.style.display = 'block';
+
+    installBtn.addEventListener('click', () => {
+      installBtn.style.display = 'none';
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        console.log('Результат установки:', choiceResult.outcome);
+        deferredPrompt = null;
+      });
+    });
+  });
+
+  window.addEventListener('appinstalled', () => {
+    console.log('Приложение установлено');
+  });
+</script>
+</button>
 </body>
+
 </html>
